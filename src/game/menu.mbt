@@ -1,4 +1,4 @@
-fn health() -> Unit {
+fn health(enemy : EnemyStatus) -> Unit {
 
   // 外边框
 
@@ -7,7 +7,7 @@ fn health() -> Unit {
   @wasm.rect(5, 30, 50, 5)
   @wasm.rect(100, 30, 50, 5)
   @wasm.text(player.hp.to_string() + "/" + player.max_hp.to_string(), 5, 20)
-  @wasm.text(sheep.hp.to_string() + "/" + sheep.max_hp.to_string(), 100, 20)
+  @wasm.text(enemy.hp.to_string() + "/" + enemy.max_hp.to_string(), 100, 20)
 
   // 实际血条
   @wasm.set_draw_colors(4, index=1)
@@ -21,7 +21,7 @@ fn health() -> Unit {
   @wasm.rect(
     100,
     30,
-    (50.0 * sheep.hp.to_double() / sheep.max_hp.to_double()).to_int(),
+    (50.0 * enemy.hp.to_double() / enemy.max_hp.to_double()).to_int(),
     5,
   )
   if player.state == "defense" {
@@ -55,6 +55,6 @@ fn menu() -> Unit {
 
 fn roundScene() -> Unit {
   menu()
-  health()
+  health(sheep)
   exp()
 }

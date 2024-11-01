@@ -1,4 +1,4 @@
-struct GameStatus {
+struct Game {
   mut scene : Scene
   mut lscene : Scene
   mut globaltime : Int
@@ -8,30 +8,55 @@ struct GameStatus {
   mut konami : String
 }
 
-pub fn gamelive() -> Unit {
-  checkStatus()
+fn Game::default() -> Game {
+  {
+    globaltime: 0,
+    roundtime: 0,
+    buttontime: 0,
+    gamepad: @wasm.get_gamepad(),
+    konami: "",
+    scene: Welcome,
+    lscene: Welcome,
+  }
+}
 
-  // info()
+fn Game::reset(self : Game) -> Unit {
+  self.buttontime = 0
+  self.globaltime = 0
+  self.roundtime = 0
+  self.scene = Welcome
+  self.lscene = Welcome
+  self.gamepad = @wasm.get_gamepad()
+  self.konami = ""
+}
+
+let game : Game = Game::default()
+
+let world : World = World::new()
+
+pub fn gamelive() -> Unit {
+  control()
+  checkStatus()
 }
 
 pub fn start() -> Unit {
-  reset()
+  gameReset()
 }
 
 pub fn update() -> Unit {
-  gameStatus.globaltime += 1
+  game.globaltime += 1
   background()
   gamelive()
 }
 
-fn reset() -> Unit {
+fn gameReset() -> Unit {
   player.exp = 0
   player.max_hp = 300
-  gameStatus.scene = Welcome
+  game.reset()
 }
 
 fn checkStatus() -> Unit {
-  match gameStatus.scene {
+  match game.scene {
     Defeat => {
       @wasm.text("Game Over", 50, 50)
       @wasm.text("Press R to restart", 10, 70)
@@ -44,26 +69,27 @@ fn checkStatus() -> Unit {
     }
     Fight => {
       if player.hp <= 0 {
-        gameStatus.scene = Defeat
+        game.scene = Defeat
       }
       if sheep.hp <= 0 {
-        gameStatus.scene = Victory
+        game.scene = Victory
       }
-      buttonPress()
       roundScene()
       // playerinfo()
       round()
-      pos.x += 1
-      if gameStatus.globaltime - gameStatus.buttontime > 20 {
-        gameStatus.konami = ""
+      if game.globaltime - game.buttontime > 20 {
+        game.konami = ""
       }
     }
     Welcome => {
       welcome()
       return
     }
-    Bonus => gameStatus.scene = Bonus
-    World => gameStatus.scene = World
+    Bonus => game.scene = Bonus
+    World => {
+      world_generate()
+      return
+    }
     Secret => {
       men()
       return

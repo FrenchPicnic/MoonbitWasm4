@@ -3,7 +3,8 @@
     {
       "path": "moonbitlang/wasm4",
       "alias": "wasm"
-    }
+    },
+    "frenchpicnic/wasm/lib"
   ],
   "link": {
     "wasm": {

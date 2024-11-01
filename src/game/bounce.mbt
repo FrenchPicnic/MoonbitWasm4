@@ -1,12 +1,12 @@
 fn men() -> Unit {
-  if gameStatus.konami == "uuddlrlrxz" {
-    gameStatus.konami = ""
-    gameStatus.scene = Secret
-    gameStatus.buttontime = 0
+  if game.konami == "uuddlrlrxz" {
+    game.konami = ""
+    game.scene = Secret
+    game.buttontime = 0
   }
-  if gameStatus.buttontime >= 200 {
-    gameStatus.buttontime = 0
-    gameStatus.scene = gameStatus.lscene
+  if game.buttontime >= 200 {
+    game.buttontime = 0
+    game.scene = game.lscene
   }
   @wasm.set_draw_colors(2, index=1)
   @wasm.set_draw_colors(3, index=2)
@@ -15,8 +15,9 @@ fn men() -> Unit {
   @wasm.text("Health Full", 20, 90)
   @wasm.text("Level MAX", 40, 90)
   @wasm.text("All skill is \nunlocked", 30, 120)
-  // @wasm.text(gameStatus.buttontime.to_string(), 20, 120)
-  gameStatus.buttontime += 1
+  // @wasm.text(game.buttontime.to_string(), 20, 120)
+  player.hp = player.max_hp
+  game.buttontime += 1
 }
 
 fn drawMen(x : Int, y : Int) -> Unit {

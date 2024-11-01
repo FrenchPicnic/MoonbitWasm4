@@ -1,36 +1,92 @@
+// 敌人稀有度
 enum EnemyType {
   Normal
-} derive(Eq)
+} derive(Eq, Show)
 
+// 敌人列表
 enum EnemyName {
   Sheep
-} derive(Eq)
+  Pumpkin
+} derive(Eq, Show)
 
+// 回合状态
+// 动画/行动/默认
 enum RoundStatus {
   Anime
   Fight
   Default
 } derive(Eq, Show)
 
-enum FightStatus {
+// 战斗状态
+// 防御/攻击/治疗/默认
+enum BattleStatus {
   // Heal
   Defense
   Attack
   Default
 } derive(Eq, Show)
 
+struct EnemyStatus {
+  mut hp : Int
+  mut battle : BattleStatus
+  mut round : RoundStatus
+  danger : EnemyType
+  anime : Map[String, Int]
+  max_hp : Int
+  name : EnemyName
+  mut attack : Int
+  mut defense : Int
+  mut finish : Int
+  hitbox : HitBox
+  mut xpos : Int
+  mut ypos : Int
+}
+
+struct HitBox {
+  width : Int
+  height : Int
+}
+
 fn EnemyStatus::draw(self : EnemyStatus, x : Int, y : Int) -> Unit {
-  if self.name == Sheep {
-    if self.danger == Normal {
-      drawSheep(x, y)
-    }
+  match self.name {
+    Sheep =>
+      if game.scene == Fight {
+        @lib.draw_sheep(x, y, size=3)
+      } else if game.scene == World {
+        @lib.draw_sheep(x, y, size=1)
+      }
+    Pumpkin =>
+      if game.scene == Fight {
+        @lib.draw_pumpkin(x, y, size=3)
+      } else if game.scene == World {
+        @lib.draw_pumpkin(x, y, size=1)
+      }
   }
+}
+
+fn EnemyStatus::ai(self : EnemyStatus) -> Unit {
+  match self.name {
+    Sheep => {
+      match self.battle {
+        Default => if rng.int(limit=10) == 10 { self.battle = Attack }
+        Attack => sheep_stampede()
+        Defense => if rng.int(limit=10) == 10 { self.battle = Attack }
+      }
+      @lib.draw_bits(1, 1)
+    }
+    Pumpkin => @lib.draw_bits(1, 1)
+  }
+}
+
+fn EnemyStatus::pos(self : EnemyStatus, x : Int, y : Int) -> Unit {
+  self.xpos = x
+  self.ypos = y
 }
 
 let sheep : EnemyStatus = {
   hp: 200,
-  state: Default,
-  status: Default,
+  round: Default,
+  battle: Default,
   danger: Normal,
   anime: { "mie": 30 },
   max_hp: 200,
@@ -38,77 +94,23 @@ let sheep : EnemyStatus = {
   attack: 0,
   defense: 0,
   finish: 0,
+  hitbox: { width: 12, height: 7 },
+  xpos: 0,
+  ypos: 0,
 }
 
-fn drawSheep(x : Int, y : Int) -> Unit {
-  @wasm.set_draw_colors(3, index=2)
-  for i = 0; i < 9; i = i + 1 {
-    for j = 0; j < 6; j = j + 1 {
-      draw_bits(x + i, y + j)
-    }
-  }
-  draw_bits(x + 9, y + 2)
-  draw_bits(x + 10, y + 2)
-  draw_bits(x + 10, y + 3)
-  draw_bits(x + 10, y + 4)
-  @wasm.set_draw_colors(1, index=2)
-  draw_bits(x, y)
-  draw_bits(x, y + 5)
-  draw_bits(x + 8, y)
-  draw_bits(x + 8, y + 5)
-  @wasm.set_draw_colors(4, index=2)
-  draw_bits(x, y + 1)
-  draw_bits(x + 4, y + 1)
-  draw_bits(x + 5, y + 1)
-  draw_bits(x + 5, y + 1)
-  draw_bits(x + 3, y + 6)
-  draw_bits(x + 7, y + 6)
-  for i = 1; i < 4; i = i + 1 {
-    draw_bits(x + i, y + 2)
-    draw_bits(x + i, y + 3)
-    draw_bits(x + i, y + 4)
-  }
-  @wasm.set_draw_colors(2, index=2)
-  draw_bits(x + 1, y + 3)
-  draw_bits(x + 3, y + 3)
-}
-
-fn sheep_Mie() -> Unit {
-  let animetime = sheep.anime.get("mie").unwrap()
-  match sheep.status {
-    Anime =>
-      if gameStatus.roundtime <= animetime {
-        sheep.draw(120 - gameStatus.roundtime * 2, 60)
-      } else if sheep.finish == 0 {
-        sheep.finish = gameStatus.roundtime
-        sheep.status = Fight
-      } else if gameStatus.roundtime - sheep.finish <= animetime {
-        sheep.draw(60 + (gameStatus.roundtime - sheep.finish) * 2, 60)
-      } else {
-        sheep.status = Default
-      }
-    Fight =>
-      if sheep.state == Attack {
-        if player.state == "defense" {
-          player.hp -= (rng.int(limit=7) + 4) / 2
-          player.state = ""
-        } else {
-          let damage = rng.int(limit=7) + 4
-          if critical(5) {
-            player.hp -= damage * 2
-          } else {
-            player.hp -= damage
-          }
-        }
-        sheep.attack += 1
-        sheep.defense += 1
-        sheep.status = Anime
-      }
-    Default => {
-      battleRound.status = "player"
-      sheep.state = Default
-      sheep.finish = 0
-      return
-    }
-  }
-}
+// let pumpkin : EnemyStatus = {
+//   hp: 200,
+//   round: Default,
+//   battle: Default,
+//   danger: Normal,
+//   anime: { "mie": 30 },
+//   max_hp: 200,
+//   name: Pumpkin,
+//   attack: 0,
+//   defense: 0,
+//   finish: 0,
+//   hitbox: { width: 0, height: 0 },
+//   xpos: 0,
+//   ypos: 0,
+// }
