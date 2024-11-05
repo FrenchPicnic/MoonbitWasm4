@@ -57,4 +57,5 @@ fn roundScene() -> Unit {
   menu()
   health(sheep)
   exp()
+  @lib.draw_hero(20, 50, size=3)
 }

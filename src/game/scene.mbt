@@ -1,20 +1,19 @@
 enum Scene {
   Welcome
   Fight
+  FightAnime
   Victory
   Defeat
   Bonus
   World
   Secret
-} derive(Eq)
+} derive(Eq, Show)
 
-fn background() -> Unit {
+fn Game::background() -> Unit {
   @wasm.set_draw_colors(1, index=1)
-  @wasm.set_draw_colors(2, index=2)
-  @wasm.set_draw_colors(4, index=3)
 }
 
-fn welcome() -> Unit {
+fn Game::welcome() -> Unit {
   @wasm.set_draw_colors(2, index=1)
   @wasm.set_draw_colors(1, index=2)
   @wasm.text("Up Dungeons", 35, 30)

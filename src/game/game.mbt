@@ -1,18 +1,20 @@
 struct Game {
   mut scene : Scene
   mut lscene : Scene
-  mut globaltime : Int
-  mut roundtime : Int
-  mut buttontime : Int
+  mut g_time : Int
+  mut r_time : Int
+  mut p_time : Int
+  mut a_time : Int
   mut gamepad : @wasm.GamePad
   mut konami : String
 }
 
 fn Game::default() -> Game {
   {
-    globaltime: 0,
-    roundtime: 0,
-    buttontime: 0,
+    g_time: 0,
+    r_time: 0,
+    p_time: 0,
+    a_time: 0,
     gamepad: @wasm.get_gamepad(),
     konami: "",
     scene: Welcome,
@@ -21,9 +23,9 @@ fn Game::default() -> Game {
 }
 
 fn Game::reset(self : Game) -> Unit {
-  self.buttontime = 0
-  self.globaltime = 0
-  self.roundtime = 0
+  self.p_time = 0
+  self.g_time = 0
+  self.r_time = 0
   self.scene = Welcome
   self.lscene = Welcome
   self.gamepad = @wasm.get_gamepad()
@@ -34,7 +36,7 @@ let game : Game = Game::default()
 
 let world : World = World::new()
 
-pub fn gamelive() -> Unit {
+pub fn gameLive() -> Unit {
   control()
   checkStatus()
 }
@@ -44,9 +46,10 @@ pub fn start() -> Unit {
 }
 
 pub fn update() -> Unit {
-  game.globaltime += 1
+  game.g_time += 1
   background()
-  gamelive()
+  gameLive()
+  // info()
 }
 
 fn gameReset() -> Unit {
@@ -74,10 +77,8 @@ fn checkStatus() -> Unit {
       if sheep.hp <= 0 {
         game.scene = Victory
       }
-      roundScene()
-      // playerinfo()
       round()
-      if game.globaltime - game.buttontime > 20 {
+      if game.g_time - game.p_time > 20 {
         game.konami = ""
       }
     }
@@ -87,7 +88,11 @@ fn checkStatus() -> Unit {
     }
     Bonus => game.scene = Bonus
     World => {
-      world_generate()
+      generate()
+      return
+    }
+    FightAnime => {
+      fight_anime()
       return
     }
     Secret => {

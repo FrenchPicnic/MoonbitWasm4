@@ -34,33 +34,25 @@ struct EnemyStatus {
   anime : Map[String, Int]
   max_hp : Int
   name : EnemyName
+  draw : @lib.DrawEnemy
   mut attack : Int
   mut defense : Int
   mut finish : Int
+  map_pos : Coordinate
   hitbox : HitBox
-  mut xpos : Int
-  mut ypos : Int
+  round_pos : Coordinate
 }
 
-struct HitBox {
-  width : Int
-  height : Int
-}
-
-fn EnemyStatus::draw(self : EnemyStatus, x : Int, y : Int) -> Unit {
-  match self.name {
-    Sheep =>
-      if game.scene == Fight {
-        @lib.draw_sheep(x, y, size=3)
-      } else if game.scene == World {
-        @lib.draw_sheep(x, y, size=1)
-      }
-    Pumpkin =>
-      if game.scene == Fight {
-        @lib.draw_pumpkin(x, y, size=3)
-      } else if game.scene == World {
-        @lib.draw_pumpkin(x, y, size=1)
-      }
+fn EnemyStatus::draw(
+  self : EnemyStatus,
+  ~x : Int = self.map_pos.x,
+  ~y : Int = self.map_pos.y,
+  scene : Scene
+) -> Unit {
+  if scene == Fight {
+    (self.draw._)(x, y, 3)
+  } else if scene == World {
+    (self.draw._)(x, y, 1)
   }
 }
 
@@ -69,18 +61,37 @@ fn EnemyStatus::ai(self : EnemyStatus) -> Unit {
     Sheep => {
       match self.battle {
         Default => if rng.int(limit=10) == 10 { self.battle = Attack }
-        Attack => sheep_stampede()
+        Attack => sheep_stampede(self)
         Defense => if rng.int(limit=10) == 10 { self.battle = Attack }
       }
-      @lib.draw_bits(1, 1)
+      @lib.draw_pixel(1, 1)
     }
-    Pumpkin => @lib.draw_bits(1, 1)
+    Pumpkin => @lib.draw_pixel(1, 1)
   }
 }
 
 fn EnemyStatus::pos(self : EnemyStatus, x : Int, y : Int) -> Unit {
-  self.xpos = x
-  self.ypos = y
+  self.map_pos.x = x
+  self.map_pos.y = y
+}
+
+fn EnemyStatus::default() -> EnemyStatus {
+  {
+    hp: 0,
+    round: Default,
+    battle: Default,
+    danger: Normal,
+    anime: {},
+    max_hp: 0,
+    name: Sheep,
+    attack: 0,
+    defense: 0,
+    finish: 0,
+    map_pos: Coordinate::{ x: 0, y: 0 },
+    round_pos: Coordinate::{ x: 0, y: 0 },
+    hitbox: { width: 0, height: 0 },
+    draw: @lib.draw_sheep,
+  }
 }
 
 let sheep : EnemyStatus = {
@@ -94,9 +105,10 @@ let sheep : EnemyStatus = {
   attack: 0,
   defense: 0,
   finish: 0,
+  map_pos: Coordinate::{ x: 80, y: 80 },
+  round_pos: Coordinate::{ x: 110, y: 50 },
   hitbox: { width: 12, height: 7 },
-  xpos: 0,
-  ypos: 0,
+  draw: @lib.draw_sheep,
 }
 
 // let pumpkin : EnemyStatus = {

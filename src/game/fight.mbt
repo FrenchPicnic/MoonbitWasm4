@@ -1,4 +1,9 @@
-pub fn fight(state : String) -> Unit {
+struct Round {
+  mut status : String
+  mut enemy : EnemyStatus
+}
+
+fn Round::fight(state : String) -> Unit {
   if state == "attack" {
     if sheep.battle == Defense {
       sheep.hp -= 5
@@ -12,19 +17,19 @@ pub fn fight(state : String) -> Unit {
   }
 }
 
-pub fn round() -> Unit {
-  @lib.draw_hero(30, 60, size=3)
+fn Round::round() -> Unit {
+  roundScene()
   if battleRound.status == "player" {
-    sheep.draw(120, 60)
-    game.roundtime = 0
+    sheep.draw(x=120, y=50, Fight)
+    game.r_time = 0
   } else {
-    game.roundtime += 1
+    game.r_time += 1
     choice.option = 0
     if sheep.round == Default && sheep.battle == Default {
       sheep.round = Anime
       sheep.battle = Attack
     }
-    sheep_stampede()
+    sheep_stampede(sheep)
   }
 
   // return false

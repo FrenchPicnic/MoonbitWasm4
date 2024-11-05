@@ -1,19 +1,23 @@
-fn sheep_stampede() -> Unit {
+fn EnemyStatus::sheep_stampede(self : EnemyStatus) -> Unit {
   let animetime = sheep.anime.get("mie").unwrap()
   match sheep.round {
     Anime =>
-      if game.roundtime <= animetime {
-        sheep.draw(120 - game.roundtime * 2, 60)
+      if game.r_time <= animetime {
+        sheep.draw(x=120 - game.r_time * 2, y=self.round_pos.y, Fight)
       } else if sheep.finish == 0 {
-        sheep.finish = game.roundtime
+        sheep.finish = game.r_time
         sheep.round = Fight
-      } else if game.roundtime - sheep.finish <= animetime {
-        sheep.draw(60 + (game.roundtime - sheep.finish) * 2, 60)
+      } else if game.r_time - sheep.finish <= animetime {
+        sheep.draw(
+          x=60 + (game.r_time - sheep.finish) * 2,
+          y=self.round_pos.y,
+          Fight,
+        )
       } else {
         sheep.round = Default
       }
     Fight => {
-      sheep.draw(60, 60)
+      sheep.draw(x=60, y=60, Fight)
       if sheep.battle == Attack {
         if player.state == "defense" {
           player.hp -= (rng.int(limit=7) + 4) / 2
@@ -32,7 +36,7 @@ fn sheep_stampede() -> Unit {
       }
     }
     Default => {
-      sheep.draw(120, 60)
+      sheep.draw(x=120, y=60, Fight)
       battleRound.status = "player"
       sheep.battle = Default
       sheep.finish = 0
