@@ -5,83 +5,91 @@ enum Button {
   Down
   X
   Z
+  None
 } derive(Eq)
 
 struct Control {
-  button : Button
-  pressed : Bool
-  move : Button
+  mut button : Button
+  mut pressed : Bool
+  mut la_button : Button
 }
 
-fn Control::move(self : Control) -> Unit {
-  match self.button {
-    Left => ()
+let keyboard : Control = Control::{
+  button: None,
+  pressed: false,
+  la_button: None,
+}
+
+fn Control::button() -> Unit {
+  let pad = @wasm.get_gamepad()
+  keyboard.button = if pad.button_right {
+    Right
+  } else if pad.button_left {
+    Left
+  } else if pad.button_up {
+    Up
+  } else if pad.button_down {
+    Down
+  } else if pad.button_1 {
+    X
+  } else if pad.button_2 {
+    Z
+  } else {
+    None
   }
+  keyboard.pressed = keyboard.button != keyboard.la_button
+  keyboard.la_button = keyboard.button
 }
 
 fn control() -> Unit {
-  let gamepad : @wasm.GamePad = @wasm.get_gamepad()
-  if game.scene == Fight {
-    fight_control(gamepad)
+  button()
+  if game.scene == Fight && keyboard.pressed {
+    fight_control()
+    game.p_time = game.g_time
   } else if game.scene == World {
-    world_control(gamepad)
+    world_control()
   }
   if game.konami == "uuddlrlrxz" {
     game.lscene = game.scene
     game.scene = Secret
   }
-  game.gamepad = gamepad
 }
 
-fn fight_control(gamepad : @wasm.GamePad) -> Unit {
-  if gamepad.button_left != game.gamepad.button_left && gamepad.button_left {
-    game.konami += "l"
-    game.p_time = game.g_time
-    if game.scene == Fight && battleRound.status == "player" {
-      choice.option = @math.maximum(1, choice.option - 1)
+fn fight_control() -> Unit {
+  match keyboard.button {
+    Left => {
+      game.konami += "l"
+      if battleRound.status == "player" {
+        choice.option = @math.maximum(1, choice.option - 1)
+      }
     }
-  } else if gamepad.button_right != game.gamepad.button_right &&
-    gamepad.button_right {
-    if game.scene == Fight && battleRound.status == "player" {
-      choice.option = @math.minimum(3, choice.option + 1)
+    Right => {
+      if battleRound.status == "player" {
+        choice.option = @math.minimum(3, choice.option + 1)
+      }
+      game.konami += "r"
     }
-    game.konami += "r"
-    game.p_time = game.g_time
-  } else if gamepad.button_up != game.gamepad.button_up && gamepad.button_up {
-    game.konami += "u"
-    game.p_time = game.g_time
-  } else if gamepad.button_down != game.gamepad.button_down &&
-    gamepad.button_down {
-    if game.scene == World {
-      player.pos.y += 1
+    Up => game.konami += "u"
+    Down => game.konami += "d"
+    X => {
+      game.konami += "x"
+      if choice.option > 0 {
+        if battleRound.status == "player" {
+          player.selfround = true
+        }
+      }
     }
-    game.konami += "d"
-    game.p_time = game.g_time
-  }
-  if gamepad.button_1 != game.gamepad.button_1 &&
-    gamepad.button_1 &&
-    choice.option > 0 {
-    if battleRound.status == "player" {
-      fight(battleStatus[choice.option - 1])
-      battleRound.status = "enemy"
-    }
-    game.konami += "x"
-    game.p_time = game.g_time
-  }
-  if gamepad.button_2 != game.gamepad.button_2 && gamepad.button_2 {
-    game.konami += "z"
-    game.p_time = game.g_time
+    Z => game.konami += "z"
+    _ => ()
   }
 }
 
-fn world_control(gamepad : @wasm.GamePad) -> Unit {
-  if gamepad.button_left {
-    player.pos.x -= 1
-  } else if gamepad.button_right {
-    player.pos.x += 1
-  } else if gamepad.button_up {
-    player.pos.y -= 1
-  } else if gamepad.button_down {
-    player.pos.y += 1
+fn world_control() -> Unit {
+  match keyboard.button {
+    Left => player.map_pos.x -= 1
+    Right => player.map_pos.x += 1
+    Up => player.map_pos.y -= 1
+    Down => player.map_pos.y += 1
+    _ => ()
   }
 }

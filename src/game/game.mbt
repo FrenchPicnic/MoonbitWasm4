@@ -5,8 +5,8 @@ struct Game {
   mut r_time : Int
   mut p_time : Int
   mut a_time : Int
-  mut gamepad : @wasm.GamePad
   mut konami : String
+  mut flag : Bool
 }
 
 fn Game::default() -> Game {
@@ -15,10 +15,10 @@ fn Game::default() -> Game {
     r_time: 0,
     p_time: 0,
     a_time: 0,
-    gamepad: @wasm.get_gamepad(),
     konami: "",
     scene: Welcome,
     lscene: Welcome,
+    flag: true,
   }
 }
 
@@ -28,7 +28,6 @@ fn Game::reset(self : Game) -> Unit {
   self.r_time = 0
   self.scene = Welcome
   self.lscene = Welcome
-  self.gamepad = @wasm.get_gamepad()
   self.konami = ""
 }
 
@@ -66,18 +65,19 @@ fn checkStatus() -> Unit {
       return
     }
     Victory => {
+      @wasm.set_draw_colors(2, index=1)
+      @wasm.set_draw_colors(0, index=2)
       @wasm.text("You Win", 50, 50)
-      @wasm.text("Press R to restart", 10, 70)
+      @wasm.text("Game is under\n development", 10, 60)
+      @wasm.text("Press X to Map", 20, 80)
+      @wasm.text("Press R to restart", 10, 100)
+      if keyboard.button == X && keyboard.pressed {
+        game.scene = World
+      }
       return
     }
     Fight => {
-      if player.hp <= 0 {
-        game.scene = Defeat
-      }
-      if sheep.hp <= 0 {
-        game.scene = Victory
-      }
-      round()
+      battle(round.enemy)
       if game.g_time - game.p_time > 20 {
         game.konami = ""
       }

@@ -1,3 +1,9 @@
+struct Choice {
+  mut option : Int
+}
+
+let choice : Choice = { option: 0 }
+
 fn health(enemy : EnemyStatus) -> Unit {
 
   // 外边框
@@ -6,8 +12,6 @@ fn health(enemy : EnemyStatus) -> Unit {
   @wasm.set_draw_colors(3, index=2)
   @wasm.rect(5, 30, 50, 5)
   @wasm.rect(100, 30, 50, 5)
-  @wasm.text(player.hp.to_string() + "/" + player.max_hp.to_string(), 5, 20)
-  @wasm.text(enemy.hp.to_string() + "/" + enemy.max_hp.to_string(), 100, 20)
 
   // 实际血条
   @wasm.set_draw_colors(4, index=1)
@@ -24,6 +28,10 @@ fn health(enemy : EnemyStatus) -> Unit {
     (50.0 * enemy.hp.to_double() / enemy.max_hp.to_double()).to_int(),
     5,
   )
+  @wasm.set_draw_colors(3, index=1)
+  @wasm.set_draw_colors(0, index=2)
+  @wasm.text(player.hp.to_string() + "/" + player.max_hp.to_string(), 5, 20)
+  @wasm.text(enemy.hp.to_string() + "/" + enemy.max_hp.to_string(), 100, 20)
   if player.state == "defense" {
     shield(60, 30)
   }
@@ -32,30 +40,31 @@ fn health(enemy : EnemyStatus) -> Unit {
 fn exp() -> Unit {
 
   // 经验外边框
-  @wasm.set_draw_colors(4, index=1)
+  @wasm.set_draw_colors(2, index=1)
   @wasm.set_draw_colors(3, index=2)
-  @wasm.rect(25, 0, 30, 5)
-  @wasm.text("exp", 0, 0)
+  @wasm.rect(25, 2, 30, 5)
 
   // 实际边框
-  @wasm.set_draw_colors(4, index=1)
-  @wasm.set_draw_colors(3, index=2)
-  @wasm.rect(25, 0, (30.0 * player.exp.to_double() / 100.0).to_int(), 5)
+
+  @wasm.rect(25, 2, (30.0 * player.exp.to_double() / 100.0).to_int(), 5)
+  @wasm.set_draw_colors(0, index=2)
+  @wasm.text("exp", 0, 0)
   @wasm.text("level" + " " + player.exp.to_string(), 100, 0)
 }
 
 fn menu() -> Unit {
+  @wasm.set_draw_colors(0, index=1)
+  @wasm.set_draw_colors(2, index=2)
   @wasm.rect(0, 100, 160, 60)
   @wasm.set_draw_colors(2, index=1)
-  @wasm.set_draw_colors(3, index=2)
+  @wasm.set_draw_colors(0, index=2)
   @wasm.text("Fight", 10, 120 - 5 * (1 == choice.option).to_int())
   @wasm.text("Defense", 60, 120 - 5 * (2 == choice.option).to_int())
   @wasm.text("Heal", 120, 120 - 5 * (3 == choice.option).to_int())
 }
 
-fn roundScene() -> Unit {
+fn round_scene() -> Unit {
   menu()
   health(sheep)
   exp()
-  @lib.draw_hero(20, 50, size=3)
 }

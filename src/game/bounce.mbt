@@ -11,6 +11,7 @@ fn men() -> Unit {
   @wasm.set_draw_colors(2, index=1)
   @wasm.set_draw_colors(3, index=2)
   drawMen(73, 15)
+  @wasm.set_draw_colors(0, index=2)
   @wasm.text("You Find The Code!", 10, 50)
   @wasm.text("Health Full", 20, 90)
   @wasm.text("Level MAX", 40, 90)
@@ -47,6 +48,9 @@ fn drawMen(x : Int, y : Int) -> Unit {
   }
 }
 
-fn critical(x : Int) -> Bool {
-  return x >= rng.int(limit=101)
+fn critical(x : Int) -> Int {
+  if x >= rng.int(limit=101) {
+    return 2
+  }
+  return 1
 }
