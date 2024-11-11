@@ -32,24 +32,28 @@ fn health(enemy : EnemyStatus) -> Unit {
   @wasm.set_draw_colors(0, index=2)
   @wasm.text(player.hp.to_string() + "/" + player.max_hp.to_string(), 5, 20)
   @wasm.text(enemy.hp.to_string() + "/" + enemy.max_hp.to_string(), 100, 20)
-  if player.state == "defense" {
+  if player.battle == Defense {
     shield(60, 30)
+  }
+  if enemy.battle == Defense {
+    shield(90, 30)
   }
 }
 
 fn exp() -> Unit {
 
   // 经验外边框
-  @wasm.set_draw_colors(2, index=1)
+  @wasm.set_draw_colors(0, index=1)
   @wasm.set_draw_colors(3, index=2)
   @wasm.rect(25, 2, 30, 5)
 
   // 实际边框
-
+  @wasm.set_draw_colors(2, index=1)
   @wasm.rect(25, 2, (30.0 * player.exp.to_double() / 100.0).to_int(), 5)
+  @wasm.set_draw_colors(3, index=1)
   @wasm.set_draw_colors(0, index=2)
   @wasm.text("exp", 0, 0)
-  @wasm.text("level" + " " + player.exp.to_string(), 100, 0)
+  @wasm.text("level " + player.level.to_string(), 90, 0)
 }
 
 fn menu() -> Unit {
@@ -63,8 +67,8 @@ fn menu() -> Unit {
   @wasm.text("Heal", 120, 120 - 5 * (3 == choice.option).to_int())
 }
 
-fn round_scene() -> Unit {
+fn round_scene(enemy : EnemyStatus) -> Unit {
   menu()
-  health(sheep)
+  health(enemy)
   exp()
 }

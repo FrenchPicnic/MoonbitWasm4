@@ -18,19 +18,11 @@ fn Round::fight(state : String, enemy : EnemyStatus) -> Unit {
     }
     sword_attack(enemy)
   } else if state == "defense" {
-    player.state = "defense"
-    battleRound.status = "enemy"
-    enemy.battle = Default
-    enemy.round = Default
-    player.selfround = false
-    game.r_time = 0
+    player.battle = Defense
+    round_enemy(enemy)
   } else if state == "heal" {
     player.hp = @math.minimum(player.hp + 10, player.max_hp)
-    battleRound.status = "enemy"
-    enemy.battle = Default
-    enemy.round = Default
-    player.selfround = false
-    game.r_time = 0
+    round_enemy(enemy)
   }
 }
 
@@ -38,15 +30,14 @@ fn Round::battle(enemy : EnemyStatus) -> Unit {
   if player.hp <= 0 {
     game.scene = Defeat
   }
-  if sheep.hp <= 0 {
+  if enemy.hp <= 0 {
     game.scene = Victory
-    world.enemylist = delete_enemy(world.enemylist, round.enemy.name)
-    round.enemy = EnemyStatus::default()
+    player.exp += enemy.level * 50
+    delete_enemy(round.enemy.level)
+    round.round_reset()
+    return
   }
-  round_scene()
-  // @wasm.set_draw_colors(2, index=1)
-  // @wasm.set_draw_colors(1, index=2)
-  // @wasm.text(player.round.to_string() + "  " + game.r_time.to_string(), 50, 100)
+  round_scene(enemy)
   if battleRound.status == "player" {
     enemy.draw(x=enemy.round_pos.x, y=enemy.round_pos.y, Fight)
     if player.selfround {
@@ -61,14 +52,13 @@ fn Round::battle(enemy : EnemyStatus) -> Unit {
     choice.option = 0
     (enemy.ai._)(enemy)
   }
-
-  // return false
 }
 
 fn damage_enemy(power : Int, crit : Int, enemy : EnemyStatus) -> Unit {
   let damage = power * critical(crit)
   if enemy.battle == Defense {
     enemy.hp -= damage / 2
+    enemy.battle = Default
   } else {
     enemy.hp -= damage
   }
@@ -76,9 +66,28 @@ fn damage_enemy(power : Int, crit : Int, enemy : EnemyStatus) -> Unit {
 
 fn damage_player(power : Int, crit : Int, hero : PlayerStatus) -> Unit {
   let damage = power * critical(crit)
-  if hero.state == "defense" {
+  if hero.battle == Defense {
     hero.hp -= damage / 2
+    hero.battle = Default
   } else {
     hero.hp -= damage
   }
+}
+
+fn Round::round_reset(self : Round) -> Unit {
+  self.status = "player"
+  player.hp = player.max_hp
+  player.battle = Default
+  choice.option = 0
+  player.selfround = false
+  self.enemy = EnemyStatus::default()
+}
+
+fn Round::round_enemy(enemy : EnemyStatus) -> Unit {
+  battleRound.status = "enemy"
+  enemy.battle = Default
+  enemy.round = Default
+  player.selfround = false
+  game.r_time = 0
+  draw_hero(player.round_pos.x, player.round_pos.y, size=3)
 }

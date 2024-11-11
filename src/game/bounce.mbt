@@ -1,5 +1,5 @@
 fn men() -> Unit {
-  if game.konami == "uuddlrlrxz" {
+  if game.konami == "uuddlrlrzx" {
     game.konami = ""
     game.scene = Secret
     game.p_time = 0
@@ -14,9 +14,9 @@ fn men() -> Unit {
   @wasm.set_draw_colors(0, index=2)
   @wasm.text("You Find The Code!", 10, 50)
   @wasm.text("Health Full", 20, 90)
-  @wasm.text("Level MAX", 40, 90)
-  @wasm.text("All skill is \nunlocked", 30, 120)
-  // @wasm.text(game.p_time.to_string(), 20, 120)
+  @wasm.text("Level MAX", 40, 110)
+  @wasm.text("All skill is \nunlocked", 30, 130)
+  player.max_hp = 1024
   player.hp = player.max_hp
   game.p_time += 1
 }
@@ -49,8 +49,35 @@ fn drawMen(x : Int, y : Int) -> Unit {
 }
 
 fn critical(x : Int) -> Int {
-  if x >= rng.int(limit=101) {
+  let r = @random.new(seed=sed[game.g_time % 9])
+  for i = 0; i < game.rng + 2; i = i + 1 {
+    game.rng = r.int(limit=101)
+  }
+  if x >= game.rng {
     return 2
   }
+  game.rng = r.int(limit=101) + r.int(limit=101) + 1
   return 1
+}
+
+fn level_up() -> Unit {
+  if player.finish == 0 {
+    player.finish = game.g_time
+    for ; player.exp > 100; {
+      player.level += 1
+      player.max_hp += 50
+      player.hp = player.max_hp
+      player.exp -= 100
+    }
+  }
+  @wasm.set_draw_colors(2, index=1)
+  @wasm.set_draw_colors(0, index=2)
+  @wasm.text("Level Up!", 50, 20)
+  @wasm.text("HP MAX", 50, 40)
+  @wasm.text("MAX_HP UP!", 50, 60)
+  if game.g_time - player.finish >= 70 {
+    player.finish = 0
+    game.bscene = None
+    game.scene = game.lscene
+  }
 }

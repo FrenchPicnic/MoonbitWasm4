@@ -49,10 +49,6 @@ fn control() -> Unit {
   } else if game.scene == World {
     world_control()
   }
-  if game.konami == "uuddlrlrxz" {
-    game.lscene = game.scene
-    game.scene = Secret
-  }
 }
 
 fn fight_control() -> Unit {
@@ -73,6 +69,11 @@ fn fight_control() -> Unit {
     Down => game.konami += "d"
     X => {
       game.konami += "x"
+      if game.konami == "uuddlrlrzx" {
+        game.lscene = game.scene
+        game.scene = Secret
+        return
+      }
       if choice.option > 0 {
         if battleRound.status == "player" {
           player.selfround = true
@@ -86,10 +87,38 @@ fn fight_control() -> Unit {
 
 fn world_control() -> Unit {
   match keyboard.button {
-    Left => player.map_pos.x -= 1
-    Right => player.map_pos.x += 1
-    Up => player.map_pos.y -= 1
-    Down => player.map_pos.y += 1
+    Left =>
+      if check_border_collision(player.map_pos.x - 1, player.map_pos.y) {
+        player.map_pos.x = @math.maximum(0, player.map_pos.x - 1)
+        world.wld.absolute.x -= 1
+      }
+    Right =>
+      if check_border_collision(player.map_pos.x + 1, player.map_pos.y) {
+        player.map_pos.x = @math.minimum(1090, player.map_pos.x + 1)
+        world.wld.absolute.x += 1
+      }
+    Up =>
+      if check_border_collision(player.map_pos.x, player.map_pos.y - 1) {
+        player.map_pos.y = @math.maximum(0, player.map_pos.y - 1)
+        world.wld.absolute.y -= 1
+      }
+    Down =>
+      if check_border_collision(player.map_pos.x, player.map_pos.y + 1) {
+        player.map_pos.y = @math.minimum(190, player.map_pos.y + 1)
+        world.wld.absolute.y += 1
+      }
     _ => ()
+  }
+  if game.scene == World {
+    if world.wld.absolute.x < 0 || player.map_pos.x < 80 {
+      world.wld.absolute.x = 0
+    } else if world.wld.absolute.x > 940 || player.map_pos.x > 1020 {
+      world.wld.absolute.x = 940
+    }
+    if world.wld.absolute.y < 0 || player.map_pos.y < 80 {
+      world.wld.absolute.y = 0
+    } else if world.wld.absolute.y > 40 || player.map_pos.y > 120 {
+      world.wld.absolute.y = 40
+    }
   }
 }

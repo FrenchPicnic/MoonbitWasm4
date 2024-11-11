@@ -25,7 +25,6 @@ let sheep_stampede : Anime = fn(self, sk) {
         damage_player(sk.damage, sk.critical, player)
         self.round = Anime
         self.finish = game.r_time
-        player.state = ""
       }
     }
     Default => {

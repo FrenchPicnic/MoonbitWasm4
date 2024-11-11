@@ -2,11 +2,11 @@ let player : PlayerStatus = PlayerStatus::default()
 
 fn PlayerStatus::default() -> PlayerStatus {
   {
-    hp: 300,
+    hp: 50,
+    level: 1,
     exp: 0,
-    max_hp: 300,
-    state: "",
-    map_pos: Coordinate::{ x: 10, y: 10 },
+    max_hp: 50,
+    map_pos: Coordinate::{ x: 20, y: 10 },
     round_pos: Coordinate::{ x: 20, y: 50 },
     battle: Default,
     round: Default,
@@ -19,7 +19,7 @@ struct PlayerStatus {
   mut hp : Int
   mut exp : Int
   mut max_hp : Int
-  mut state : String
+  mut level : Int
   map_pos : Coordinate
   round_pos : Coordinate
   mut battle : BattleStatus
@@ -45,7 +45,6 @@ fn sword_attack(enemy : EnemyStatus) -> Unit {
     Anime =>
       if game.r_time < 50 {
         draw_hero(player.round_pos.x + game.r_time, player.round_pos.y, size=3)
-        player.finish = game.r_time
       } else if game.r_time >= 51 && game.r_time < 57 {
         draw_hero(
           player.round_pos.x + 50,
@@ -90,8 +89,8 @@ fn sword_attack(enemy : EnemyStatus) -> Unit {
         game.r_time = 0
       }
     Action => {
-      draw_hero(player.round_pos.x + game.r_time, player.round_pos.y, size=3)
-      damage_enemy(50, 0, enemy)
+      draw_hero(player.round_pos.x + 50, player.round_pos.y, size=3)
+      damage_enemy(player.level * 10, 0, enemy)
       player.round = Anime
     }
     Default => return

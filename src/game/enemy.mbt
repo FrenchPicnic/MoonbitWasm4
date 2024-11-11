@@ -33,7 +33,7 @@ type AI (EnemyStatus) -> Unit
 struct EnemyStatus {
   mut hp : Int
   max_hp : Int
-  danger : EnemyType
+  level : Int
   name : EnemyName
   draw : @lib.DrawEnemy
   map_pos : Coordinate
@@ -57,17 +57,12 @@ struct Skill {
   critical : Int
 }
 
-fn delete_enemy(
-  enemylist : Array[EnemyStatus],
-  name : EnemyName
-) -> Array[EnemyStatus] {
-  for i, x in enemylist {
-    if x.name == name {
-      let _ = enemylist.remove(i)
-      return enemylist
+fn delete_enemy(level : Int) -> Unit {
+  for i, x in world.wld.enemylist {
+    if x.level == level {
+      world.wld.enemylist[i].hp = 0
     }
   }
-  return enemylist
 }
 
 fn EnemyStatus::draw(
@@ -99,9 +94,9 @@ fn EnemyStatus::round_reset(self : EnemyStatus) -> Unit {
 fn EnemyStatus::default() -> EnemyStatus {
   {
     hp: 0,
+    level: 1,
     round: Default,
     battle: Default,
-    danger: Normal,
     max_hp: 0,
     name: Sheep,
     attack: 0,
@@ -116,30 +111,37 @@ fn EnemyStatus::default() -> EnemyStatus {
   }
 }
 
-let sheep : EnemyStatus = {
-  hp: 200,
-  round: Default,
-  battle: Default,
-  danger: Normal,
-  max_hp: 200,
-  name: Sheep,
-  attack: 0,
-  defense: 0,
-  finish: 0,
-  map_pos: Coordinate::{ x: 20, y: 20 },
-  round_pos: Coordinate::{ x: 110, y: 50 },
-  hitbox: { width: 12, height: 7 },
-  draw: @lib.draw_sheep,
-  skill: {
-    "stampede": Skill::{
-      anime_time: 30,
-      anime: sheep_stampede,
-      battle_type: Attack,
-      damage: 10,
-      critical: 5,
+fn EnemyStatus::sheep(
+  map_x : Int,
+  map_y : Int,
+  level : Int,
+  maxh : Int
+) -> EnemyStatus {
+  {
+    hp: maxh,
+    level,
+    round: Default,
+    battle: Default,
+    max_hp: maxh,
+    name: Sheep,
+    attack: 0,
+    defense: 0,
+    finish: 0,
+    map_pos: Coordinate::{ x: map_x, y: map_y },
+    round_pos: Coordinate::{ x: 110, y: 50 },
+    hitbox: { width: 12, height: 7 },
+    draw: @lib.draw_sheep,
+    skill: {
+      "stampede": Skill::{
+        anime_time: 30,
+        anime: sheep_stampede,
+        battle_type: Attack,
+        damage: 3 * level,
+        critical: 5 * @math.minimum(2, level),
+      },
     },
-  },
-  ai: sheep_ai,
+    ai: sheep_ai,
+  }
 }
 
 // let pumpkin : EnemyStatus = {
