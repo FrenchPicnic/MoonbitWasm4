@@ -1,5 +1,7 @@
-let sheep_stampede : Anime = fn(self, sk) {
-  let animetime = self.skill.get("stampede").unwrap().anime_time
+type Anime (EnemyStatus, Skill) -> Unit
+
+let stampede : Anime = fn(self, sk) {
+  let animetime = self.skill.anime_time
   match self.round {
     Anime =>
       if game.r_time <= animetime {

@@ -5,6 +5,7 @@ enum EnemyType {
 
 // 敌人列表
 enum EnemyName {
+  None
   Sheep
   Pumpkin
 } derive(Eq, Show)
@@ -18,15 +19,14 @@ enum RoundStatus {
 } derive(Eq, Show)
 
 // 战斗状态
-// 防御/攻击/治疗/默认
+// 防御/攻击/治疗/特殊/默认
 enum BattleStatus {
   Heal
   Defense
   Attack
   Default
+  Special
 } derive(Eq, Show)
-
-type Anime (EnemyStatus, Skill) -> Unit
 
 type AI (EnemyStatus) -> Unit
 
@@ -46,13 +46,12 @@ struct EnemyStatus {
   mut finish : Int
   round_pos : Coordinate
   ai : AI
-  skill : Map[String, Skill]
+  skill : Skill
 }
 
 struct Skill {
   anime_time : Int
   anime : Anime
-  battle_type : BattleStatus
   damage : Int
   critical : Int
 }
@@ -88,17 +87,17 @@ fn EnemyStatus::round_reset(self : EnemyStatus) -> Unit {
   self.finish = 0
   game.r_time = 0
   self.draw(x=self.round_pos.x, y=self.round_pos.y, Fight)
-  battleRound.status = "player"
+  round.status = "player"
 }
 
 fn EnemyStatus::default() -> EnemyStatus {
   {
     hp: 0,
-    level: 1,
+    level: 0,
     round: Default,
     battle: Default,
     max_hp: 0,
-    name: Sheep,
+    name: None,
     attack: 0,
     defense: 0,
     finish: 0,
@@ -106,7 +105,12 @@ fn EnemyStatus::default() -> EnemyStatus {
     round_pos: Coordinate::{ x: 0, y: 0 },
     hitbox: { width: 0, height: 0 },
     draw: @lib.draw_default,
-    skill: {},
+    skill: Skill::{
+      anime_time: 30,
+      anime: default_anime,
+      damage: 0,
+      critical: 0,
+    },
     ai: default_ai,
   }
 }
@@ -128,17 +132,44 @@ fn EnemyStatus::sheep(
     defense: 0,
     finish: 0,
     map_pos: Coordinate::{ x: map_x, y: map_y },
-    round_pos: Coordinate::{ x: 110, y: 50 },
+    round_pos: Coordinate::{ x: 110, y: 36 },
     hitbox: { width: 12, height: 7 },
     draw: @lib.draw_sheep,
-    skill: {
-      "stampede": Skill::{
-        anime_time: 30,
-        anime: sheep_stampede,
-        battle_type: Attack,
-        damage: 3 * level,
-        critical: 5 * @math.minimum(2, level),
-      },
+    skill: Skill::{
+      anime_time: 30,
+      anime: stampede,
+      damage: 3 * level,
+      critical: 5 * @math.minimum(2, level),
+    },
+    ai: sheep_ai,
+  }
+}
+
+fn EnemyStatus::chest(
+  map_x : Int,
+  map_y : Int,
+  level : Int,
+  maxh : Int
+) -> EnemyStatus {
+  {
+    hp: maxh,
+    level,
+    round: Default,
+    battle: Default,
+    max_hp: maxh,
+    name: Sheep,
+    attack: 0,
+    defense: 0,
+    finish: 0,
+    map_pos: Coordinate::{ x: map_x, y: map_y },
+    round_pos: Coordinate::{ x: 110, y: 36 },
+    hitbox: { width: 12, height: 7 },
+    draw: @lib.draw_sheep,
+    skill: Skill::{
+      anime_time: 30,
+      anime: stampede,
+      damage: 3 * level,
+      critical: 5 * @math.minimum(2, level),
     },
     ai: sheep_ai,
   }

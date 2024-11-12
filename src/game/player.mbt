@@ -1,31 +1,31 @@
+struct PlayerStatus {
+  mut hp : Int
+  mut max_hp : Int
+  mut level : Int
+  map_pos : Coordinate
+  round_pos : Coordinate
+  bonus_pos : Coordinate
+  mut battle : BattleStatus
+  mut round : RoundStatus
+  mut finish : Int
+  mut selfround : Bool
+}
+
 let player : PlayerStatus = PlayerStatus::default()
 
 fn PlayerStatus::default() -> PlayerStatus {
   {
     hp: 50,
     level: 1,
-    exp: 0,
     max_hp: 50,
     map_pos: Coordinate::{ x: 20, y: 10 },
-    round_pos: Coordinate::{ x: 20, y: 50 },
+    round_pos: Coordinate::{ x: 20, y: 35 },
+    bonus_pos: Coordinate::{ x: 0, y: 0 },
     battle: Default,
     round: Default,
     finish: 0,
     selfround: false,
   }
-}
-
-struct PlayerStatus {
-  mut hp : Int
-  mut exp : Int
-  mut max_hp : Int
-  mut level : Int
-  map_pos : Coordinate
-  round_pos : Coordinate
-  mut battle : BattleStatus
-  mut round : RoundStatus
-  mut finish : Int
-  mut selfround : Bool
 }
 
 fn draw_hero(
@@ -81,10 +81,11 @@ fn sword_attack(enemy : EnemyStatus) -> Unit {
         )
       } else if game.r_time >= 120 {
         draw_hero(player.round_pos.x, player.round_pos.y, size=3, scene=Default)
-        battleRound.status = "enemy"
+        round.status = "enemy"
         enemy.battle = Default
         enemy.round = Default
         player.battle = Default
+        player.round = Default
         player.selfround = false
         game.r_time = 0
       }

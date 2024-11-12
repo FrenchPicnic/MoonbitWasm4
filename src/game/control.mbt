@@ -14,6 +14,8 @@ struct Control {
   mut la_button : Button
 }
 
+type LevelControl (PlayerStatus) -> Unit
+
 let keyboard : Control = Control::{
   button: None,
   pressed: false,
@@ -43,8 +45,13 @@ fn Control::button() -> Unit {
 
 fn control() -> Unit {
   button()
-  if game.scene == Fight && keyboard.pressed {
-    fight_control()
+  if game.scene == Fight {
+    if not(player.selfround) && keyboard.pressed {
+      fight_control()
+    }
+    if round.enemy.battle == Special {
+      b0_control()
+    }
     game.p_time = game.g_time
   } else if game.scene == World {
     world_control()
@@ -55,12 +62,12 @@ fn fight_control() -> Unit {
   match keyboard.button {
     Left => {
       game.konami += "l"
-      if battleRound.status == "player" {
+      if round.status == "player" {
         choice.option = @math.maximum(1, choice.option - 1)
       }
     }
     Right => {
-      if battleRound.status == "player" {
+      if round.status == "player" {
         choice.option = @math.minimum(3, choice.option + 1)
       }
       game.konami += "r"
@@ -75,7 +82,7 @@ fn fight_control() -> Unit {
         return
       }
       if choice.option > 0 {
-        if battleRound.status == "player" {
+        if round.status == "player" {
           player.selfround = true
         }
       }
@@ -120,5 +127,15 @@ fn world_control() -> Unit {
     } else if world.wld.absolute.y > 40 || player.map_pos.y > 120 {
       world.wld.absolute.y = 40
     }
+  }
+}
+
+fn b0_control() -> Unit {
+  match keyboard.button {
+    Left => player.bonus_pos.x = @math.maximum(0, player.bonus_pos.x - 1)
+    Right => player.bonus_pos.x = @math.minimum(150, player.bonus_pos.x + 1)
+    Up => player.bonus_pos.y = @math.maximum(80, player.bonus_pos.y - 1)
+    Down => player.bonus_pos.y = @math.minimum(150, player.bonus_pos.y + 1)
+    _ => ()
   }
 }

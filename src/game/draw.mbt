@@ -1,6 +1,5 @@
 fn shield(x : Int, y : Int) -> Unit {
-  @wasm.set_draw_colors(2, index=1)
-  @wasm.set_draw_colors(3, index=2)
+  two_color(2, 3)
   @wasm.rect(x, y, 1, 1)
   @wasm.rect(x - 1, y, 1, 1)
   @wasm.rect(x - 2, y + 1, 1, 1)

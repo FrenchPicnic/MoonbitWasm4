@@ -11,6 +11,16 @@ struct Tree {
   draw : @lib.DrawEnemy
 }
 
+struct Coordinate {
+  mut x : Int
+  mut y : Int
+}
+
+struct HitBox {
+  width : Int
+  height : Int
+}
+
 fn World::new() -> World {
   let tree_list : Array[Tree] = Array::new()
   let enemy_list : Array[EnemyStatus] = Array::new()
@@ -27,12 +37,16 @@ fn World::new() -> World {
           game.g_time += 1
           game.rng = r.int(limit=101)
           if line == 1 {
-            enemy_list.push(
-              EnemyStatus::sheep(i + 10 + game.rng % 5, 30, lvl, 20 * lvl),
-            )
+            if game.rng % 4 < 2 {
+              enemy_list.push(
+                EnemyStatus::sheep(i + 15 + game.rng % 5, 30, lvl, 20 * lvl),
+              )
+            } else {
+
+            }
           }
           if line == 10 {
-            if game.rng % 5 == 0 || game.rng % 5 == 3 {
+            if game.rng % 5 == 0 || game.rng % 5 == 3 || game.rng % 5 == 2 {
               flag1 = false
             }
           }
@@ -52,9 +66,13 @@ fn World::new() -> World {
           game.g_time += 1
           game.rng = r.int(limit=101)
           if line == 1 {
-            enemy_list.push(
-              EnemyStatus::sheep(i + 10 + game.rng % 4, 80, lvl, 20 * lvl),
-            )
+            if game.rng % 2 == 0 {
+              enemy_list.push(
+                EnemyStatus::sheep(i + 15 + game.rng % 9, 80, lvl, 20 * lvl),
+              )
+            } else {
+
+            }
           }
           if line == 10 {
             if game.rng % 4 == 0 || game.rng % 4 == 3 {
@@ -78,7 +96,7 @@ fn World::new() -> World {
           if j == 150 {
             if line == 1 {
               enemy_list.push(
-                EnemyStatus::sheep(i + 10 + game.rng % 7, 130, lvl, 20 * lvl),
+                EnemyStatus::sheep(i + 15 + game.rng % 15, 130, lvl, 20 * lvl),
               )
             }
           }
@@ -160,8 +178,7 @@ fn World::fight_anime() -> Unit {
       }
     }
   } else if game.a_time <= 110 {
-    @wasm.set_draw_colors(3, index=1)
-    @wasm.set_draw_colors(3, index=2)
+    two_color(3, 3)
     @wasm.rect(0, 0, 160, 160)
     enemy_small(round.enemy)
   } else {
@@ -213,12 +230,10 @@ fn check_border_collision(x : Int, y : Int) -> Bool {
 }
 
 fn enemy_small(self : EnemyStatus) -> Unit {
-  @wasm.set_draw_colors(1, index=1)
-  @wasm.set_draw_colors(3, index=2)
+  two_color(1, 3)
   // @wasm.text()
   @wasm.rect(50, 50, 50, 50)
-  @wasm.set_draw_colors(2, index=1)
-  @wasm.set_draw_colors(0, index=2)
+  two_color(2, 0)
   @wasm.text(self.name.to_string(), 55, 60)
   (self.draw._)(70, 80, 1)
 }

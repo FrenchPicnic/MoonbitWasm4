@@ -45,20 +45,16 @@ let game : Game = Game::default()
 let world : Big = Big::{ wld: World::new() }
 
 pub fn start() -> Unit {
-  gameReset()
+  player.max_hp = 50
+  @wasm.set_palette(1, @wasm.rgb(0xfbf7f3))
+  @wasm.set_palette(4, @wasm.rgb(0x222034))
+  game.reset()
 }
 
 pub fn update() -> Unit {
   game.g_time += 1
-  background()
   control()
   checkStatus()
-}
-
-fn gameReset() -> Unit {
-  player.exp = 0
-  player.max_hp = 50
-  game.reset()
 }
 
 fn checkStatus() -> Unit {
@@ -69,13 +65,21 @@ fn checkStatus() -> Unit {
       return
     }
     Victory => {
-      @wasm.set_draw_colors(2, index=1)
-      @wasm.set_draw_colors(0, index=2)
+      two_color(2, 0)
       @wasm.text("You Win", 50, 50)
-      // @wasm.text("Game is under\n development", 10, 60)
       @wasm.text("Press X to Map", 30, 80)
       if keyboard.button == X && keyboard.pressed {
-        game.scene = World
+        for j = 0; j < 210; j = j + 14 {
+          world.wld.borderlist.push(
+            Tree::{
+              map_pos: Coordinate::{ x: player.map_pos.x - 15, y: j },
+              draw: @lib.draw_tree,
+            },
+          )
+        }
+        game.lscene = World
+        game.scene = Bonus
+        game.bscene = LevelUp
       }
       return
     }
@@ -91,16 +95,6 @@ fn checkStatus() -> Unit {
     }
     Bonus => check_Bouns()
     World => {
-      if player.exp >= 100 {
-        game.lscene = World
-        game.scene = Bonus
-        game.bscene = LevelUp
-        return
-      }
-      if game.flag == true {
-        world.wld = World::new()
-        game.flag = false
-      }
       generate()
       return
     }
@@ -112,11 +106,5 @@ fn checkStatus() -> Unit {
       men()
       return
     }
-  }
-}
-
-fn check_Bouns() -> Unit {
-  match game.bscene {
-    LevelUp => level_up()
   }
 }
