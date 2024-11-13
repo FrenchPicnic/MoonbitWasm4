@@ -72,7 +72,7 @@ fn Round::battle(enemy : EnemyStatus) -> Unit {
   round_scene(enemy)
   // @wasm.text(player.battle.to_string(), 20, 20)
   if round.status == "player" {
-    if enemy.level == 108 && enemy.attack == 2 {
+    if enemy.level == 108 && enemy.attack == 13 {
       two_color(4, 0)
       @wasm.text("Finish it!", 45, 25)
       battleStatus[1] = "Fight"
@@ -86,7 +86,10 @@ fn Round::battle(enemy : EnemyStatus) -> Unit {
     enemy.draw(x=enemy.round_pos.x, y=enemy.round_pos.y, Fight)
     if player.selfround {
       player.finish += 1
-      if enemy.level == 108 && enemy.attack == 2 {
+      if player.battle == Defense {
+        player.battle = Default
+      }
+      if enemy.level == 108 && enemy.attack == 13 {
         fight(battleStatus[0], round.enemy)
         return
       }
@@ -105,9 +108,15 @@ fn Round::battle(enemy : EnemyStatus) -> Unit {
 fn damage_enemy(power : Int, crit : Int, enemy : EnemyStatus) -> Int {
   let damage = power * critical(crit)
   if enemy.name == Pumpkin {
-    enemy.hp -= 1
-    enemy.battle = Default
-    return 1
+    if player.level != 19 {
+      enemy.hp = enemy.hp - 10 - 2 * (player.level > 3).to_int()
+      enemy.battle = Default
+      return 10 + 2 * (player.level > 3).to_int()
+    } else {
+      enemy.hp -= 3
+      enemy.battle = Default
+      return 3
+    }
   }
   if enemy.battle == Defense {
     enemy.hp -= 1

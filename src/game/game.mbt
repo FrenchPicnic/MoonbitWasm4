@@ -113,7 +113,7 @@ fn checkStatus() -> Unit {
       two_color(1, 0)
       @wasm.text("You Beat The BOSS", 10, 50)
       @wasm.text("Thanks for playing", 10, 80)
-      @wasm.text("Game made by\n FrenchPicnic", 10, 100)
+      @wasm.text("Game made by\n FrenchPicnic", 20, 100)
       @wasm.text("Press R to restart", 10, 130)
     }
   }

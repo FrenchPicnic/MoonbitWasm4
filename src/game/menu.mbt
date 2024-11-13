@@ -7,7 +7,7 @@ let choice : Choice = { option: 0, cursor: { x: 20, y: 1 } }
 
 fn health(enemy : EnemyStatus) -> Unit {
   @wasm.text("level " + player.level.to_string(), 0, 0)
-  @wasm.text("level " + enemy.level.to_string(), 100, 0)
+  @wasm.text("level " + enemy.level.to_string(), 90, 0)
   // 外边框
   two_color(1, 3)
   @wasm.rect(5, 10, 60, 11)

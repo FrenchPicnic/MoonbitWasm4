@@ -286,8 +286,8 @@ fn check_border_collision(x : Int, y : Int) -> Bool {
 fn enemy_small(self : EnemyStatus) -> Unit {
   two_color(1, 3)
   // @wasm.text()
-  @wasm.rect(40, 40, 60, 60)
+  @wasm.rect(40, 40, 70, 60)
   two_color(2, 0)
-  @wasm.text(self.name.to_string(), 50, 60)
+  @wasm.text(self.name.to_string(), 45, 60)
   (self.draw._)(70, 80, 1)
 }

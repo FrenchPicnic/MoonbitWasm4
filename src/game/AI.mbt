@@ -33,7 +33,7 @@ let sheep_ai : AI = fn(self) {
 
 let pumpkin_ai : AI = fn(self) {
   draw_hero(player.round_pos.x, player.round_pos.y, size=3)
-  if self.attack == 2 && player.level != 19 {
+  if self.attack == 13 && player.level != 19 {
     if self.finish == 0 {
       self.defense = 1
     }

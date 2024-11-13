@@ -85,7 +85,7 @@ fn sword_attack(enemy : EnemyStatus) -> Unit {
           scene=Default,
         )
         two_color(4, 0)
-        if enemy.level == 108 && enemy.attack == 2 {
+        if enemy.level == 108 && enemy.attack == 13 {
           @wasm.text("-108", 130, 25)
         } else {
           @wasm.text("-" + player.damage.to_string(), 130, 25)
