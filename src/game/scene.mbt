@@ -7,10 +7,12 @@ enum Scene {
   Bonus
   World
   Secret
+  Finish
 } derive(Eq, Show)
 
 enum BounsScene {
   LevelUp
+  Heal
   None
 }
 

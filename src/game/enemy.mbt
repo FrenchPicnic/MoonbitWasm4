@@ -1,7 +1,4 @@
 // 敌人稀有度
-enum EnemyType {
-  Normal
-} derive(Eq, Show)
 
 // 敌人列表
 enum EnemyName {
@@ -21,7 +18,6 @@ enum RoundStatus {
 // 战斗状态
 // 防御/攻击/治疗/特殊/默认
 enum BattleStatus {
-  Heal
   Defense
   Attack
   Default
@@ -73,6 +69,10 @@ fn EnemyStatus::draw(
   if scene == Fight {
     (self.draw._)(x, y, 3)
   } else if scene == World {
+    if self.name == Pumpkin {
+      (self.draw._)(x, y, 4)
+      return
+    }
     (self.draw._)(x, y, 1)
   }
 }
@@ -86,6 +86,8 @@ fn EnemyStatus::round_reset(self : EnemyStatus) -> Unit {
   self.round = Default
   self.finish = 0
   game.r_time = 0
+  round.rng = -1
+  player.battle = Default
   self.draw(x=self.round_pos.x, y=self.round_pos.y, Fight)
   round.status = "player"
 }
@@ -145,36 +147,25 @@ fn EnemyStatus::sheep(
   }
 }
 
-fn EnemyStatus::chest(
-  map_x : Int,
-  map_y : Int,
-  level : Int,
-  maxh : Int
-) -> EnemyStatus {
+fn EnemyStatus::pumpkin(map_x : Int, map_y : Int) -> EnemyStatus {
   {
-    hp: maxh,
-    level,
+    hp: 108,
+    level: 108,
     round: Default,
     battle: Default,
-    max_hp: maxh,
-    name: Sheep,
+    max_hp: 108,
+    name: Pumpkin,
     attack: 0,
     defense: 0,
     finish: 0,
     map_pos: Coordinate::{ x: map_x, y: map_y },
     round_pos: Coordinate::{ x: 110, y: 36 },
-    hitbox: { width: 12, height: 7 },
-    draw: @lib.draw_sheep,
-    skill: Skill::{
-      anime_time: 30,
-      anime: stampede,
-      damage: 3 * level,
-      critical: 5 * @math.minimum(2, level),
-    },
-    ai: sheep_ai,
+    hitbox: { width: 30, height: 30 },
+    draw: @lib.draw_pumpkin,
+    skill: Skill::{ anime_time: 30, anime: stampede, damage: 5, critical: 0 },
+    ai: pumpkin_ai,
   }
 }
-
 // let pumpkin : EnemyStatus = {
 //   hp: 200,
 //   round: Default,

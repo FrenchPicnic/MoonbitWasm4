@@ -35,3 +35,28 @@ let stampede : Anime = fn(self, sk) {
     }
   }
 }
+
+fn lose_anime(self : EnemyStatus) -> Unit {
+  self.finish += 1
+  if self.finish % 20 == 0 {
+    self.defense = -self.defense
+  }
+  self.draw(
+    x=self.round_pos.x + 5 * self.defense,
+    y=self.round_pos.y + 5 * self.defense,
+    Fight,
+  )
+  two_color(2, 2)
+  for i = 0; i <= self.finish / 8; i = i + 1 {
+    for j = 0; j <= self.finish / 8; j = j + 1 {
+      @lib.draw_pixel(80 + i, 80 + j)
+      @lib.draw_pixel(80 + i, 80 - j)
+      @lib.draw_pixel(80 - i, 80 + j)
+      @lib.draw_pixel(80 - i, 80 - j)
+    }
+  }
+  if self.finish >= 640 {
+    game.scene = Finish
+    return
+  }
+}

@@ -1,6 +1,7 @@
 struct World {
   enemylist : Array[EnemyStatus]
   borderlist : Array[Tree]
+  heallist : Array[Tree]
   // mut borderlist: Array[String]
   // relative : Coordinate
   absolute : Coordinate
@@ -9,6 +10,7 @@ struct World {
 struct Tree {
   map_pos : Coordinate
   draw : @lib.DrawEnemy
+  mut lvl : Int
 }
 
 struct Coordinate {
@@ -24,6 +26,7 @@ struct HitBox {
 fn World::new() -> World {
   let tree_list : Array[Tree] = Array::new()
   let enemy_list : Array[EnemyStatus] = Array::new()
+  let medic_list : Array[Tree] = Array::new()
   if game.scene == World {
     let mut line : Int = 0
     let mut lvl : Int = 1
@@ -39,10 +42,16 @@ fn World::new() -> World {
           if line == 1 {
             if game.rng % 4 < 2 {
               enemy_list.push(
-                EnemyStatus::sheep(i + 15 + game.rng % 5, 30, lvl, 20 * lvl),
+                EnemyStatus::sheep(i + 15 + game.rng % 7, 30, lvl, 10 * lvl),
               )
             } else {
-
+              medic_list.push(
+                Tree::{
+                  map_pos: Coordinate::{ x: i + 15 + game.rng % 7, y: 30 },
+                  draw: @lib.draw_heal,
+                  lvl,
+                },
+              )
             }
           }
           if line == 10 {
@@ -55,6 +64,7 @@ fn World::new() -> World {
               Tree::{
                 map_pos: Coordinate::{ x: i, y: j },
                 draw: @lib.draw_tree,
+                lvl: i,
               },
             )
           }
@@ -68,10 +78,16 @@ fn World::new() -> World {
           if line == 1 {
             if game.rng % 2 == 0 {
               enemy_list.push(
-                EnemyStatus::sheep(i + 15 + game.rng % 9, 80, lvl, 20 * lvl),
+                EnemyStatus::sheep(i + 15 + game.rng % 15, 80, lvl, 10 * lvl),
               )
             } else {
-
+              medic_list.push(
+                Tree::{
+                  map_pos: Coordinate::{ x: i + 15 + game.rng % 7, y: 80 },
+                  draw: @lib.draw_heal,
+                  lvl,
+                },
+              )
             }
           }
           if line == 10 {
@@ -84,6 +100,7 @@ fn World::new() -> World {
               Tree::{
                 map_pos: Coordinate::{ x: i, y: j },
                 draw: @lib.draw_tree,
+                lvl: i,
               },
             )
           }
@@ -96,20 +113,26 @@ fn World::new() -> World {
           if j == 150 {
             if line == 1 {
               enemy_list.push(
-                EnemyStatus::sheep(i + 15 + game.rng % 15, 130, lvl, 20 * lvl),
+                EnemyStatus::sheep(i + 15 + game.rng % 30, 130, lvl, 10 * lvl),
               )
             }
           }
           tree_list.push(
-            Tree::{ map_pos: Coordinate::{ x: i, y: j }, draw: @lib.draw_tree },
+            Tree::{
+              map_pos: Coordinate::{ x: i, y: j },
+              draw: @lib.draw_tree,
+              lvl: i,
+            },
           )
         }
       }
     }
   }
+  enemy_list.push(EnemyStatus::pumpkin(1020, 80))
   return {
     enemylist: enemy_list,
     borderlist: tree_list,
+    heallist: medic_list,
     // relative: Coordinate::{ x: 0, y: 0 },
     absolute: Coordinate::{ x: 0, y: 0 },
   }
@@ -131,6 +154,10 @@ fn Tree::draw(
 fn World::generate() -> Unit {
   for k in world.wld.enemylist {
     if k.hp <= 0 {
+      if k.name == Pumpkin {
+        game.scene = Finish
+        return
+      }
       continue
     } else {
       k.draw(
@@ -140,10 +167,17 @@ fn World::generate() -> Unit {
       )
     }
   }
-  if world.wld.enemylist.length() == 0 {
-
-  }
   for k in world.wld.borderlist {
+    k.draw(
+      World,
+      x=k.map_pos.x - world.wld.absolute.x,
+      y=k.map_pos.y - world.wld.absolute.y,
+    )
+  }
+  for k in world.wld.heallist {
+    if k.lvl == 0 {
+      continue
+    }
     k.draw(
       World,
       x=k.map_pos.x - world.wld.absolute.x,
@@ -156,6 +190,7 @@ fn World::generate() -> Unit {
   )
   if game.scene == World {
     check_collision()
+    check_medic_collision()
   }
 }
 
@@ -216,6 +251,25 @@ fn check_collision() -> Unit {
   }
 }
 
+fn check_medic_collision() -> Unit {
+  for k in world.wld.heallist {
+    if (
+        player.map_pos.x + 8 <= k.map_pos.x ||
+        player.map_pos.x >= k.map_pos.x + 4
+      ) ||
+      player.map_pos.y + 8 <= k.map_pos.y ||
+      player.map_pos.y >= k.map_pos.y + 4 {
+      continue
+    } else if k.lvl != 0 {
+      game.lscene = game.scene
+      game.scene = Bonus
+      game.bscene = Heal
+      bonus_time.tenzor = k.lvl
+      k.lvl = 0
+    }
+  }
+}
+
 fn check_border_collision(x : Int, y : Int) -> Bool {
   for k in world.wld.borderlist {
     if (x + 8 <= k.map_pos.x || x >= k.map_pos.x + 14) ||
@@ -232,8 +286,8 @@ fn check_border_collision(x : Int, y : Int) -> Bool {
 fn enemy_small(self : EnemyStatus) -> Unit {
   two_color(1, 3)
   // @wasm.text()
-  @wasm.rect(50, 50, 50, 50)
+  @wasm.rect(40, 40, 60, 60)
   two_color(2, 0)
-  @wasm.text(self.name.to_string(), 55, 60)
+  @wasm.text(self.name.to_string(), 50, 60)
   (self.draw._)(70, 80, 1)
 }

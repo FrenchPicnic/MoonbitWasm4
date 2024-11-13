@@ -45,7 +45,7 @@ let game : Game = Game::default()
 let world : Big = Big::{ wld: World::new() }
 
 pub fn start() -> Unit {
-  player.max_hp = 50
+  player.max_hp = 14
   @wasm.set_palette(1, @wasm.rgb(0xfbf7f3))
   @wasm.set_palette(4, @wasm.rgb(0x222034))
   game.reset()
@@ -74,6 +74,7 @@ fn checkStatus() -> Unit {
             Tree::{
               map_pos: Coordinate::{ x: player.map_pos.x - 15, y: j },
               draw: @lib.draw_tree,
+              lvl: 1,
             },
           )
         }
@@ -105,6 +106,15 @@ fn checkStatus() -> Unit {
     Secret => {
       men()
       return
+    }
+    Finish => {
+      two_color(2, 0)
+      @wasm.rect(0, 0, 160, 160)
+      two_color(1, 0)
+      @wasm.text("You Beat The BOSS", 10, 50)
+      @wasm.text("Thanks for playing", 10, 80)
+      @wasm.text("Game made by\n FrenchPicnic", 10, 100)
+      @wasm.text("Press R to restart", 10, 130)
     }
   }
 }

@@ -14,7 +14,7 @@ struct Control {
   mut la_button : Button
 }
 
-type LevelControl (PlayerStatus) -> Unit
+type LevelControl () -> Unit
 
 let keyboard : Control = Control::{
   button: None,
@@ -47,12 +47,12 @@ fn control() -> Unit {
   button()
   if game.scene == Fight {
     if not(player.selfround) && keyboard.pressed {
+      game.p_time = game.g_time
       fight_control()
     }
     if round.enemy.battle == Special {
-      b0_control()
+      (bonus_levels[round.rng].control._)()
     }
-    game.p_time = game.g_time
   } else if game.scene == World {
     world_control()
   }
@@ -130,12 +130,44 @@ fn world_control() -> Unit {
   }
 }
 
-fn b0_control() -> Unit {
+let b0_control : LevelControl = fn() -> Unit {
   match keyboard.button {
     Left => player.bonus_pos.x = @math.maximum(0, player.bonus_pos.x - 1)
     Right => player.bonus_pos.x = @math.minimum(150, player.bonus_pos.x + 1)
     Up => player.bonus_pos.y = @math.maximum(80, player.bonus_pos.y - 1)
     Down => player.bonus_pos.y = @math.minimum(150, player.bonus_pos.y + 1)
     _ => ()
+  }
+}
+
+let b1_control : LevelControl = fn() -> Unit {
+  if keyboard.pressed {
+    match keyboard.button {
+      Left => {
+        b1_shield.pos.x = 70
+        b1_shield.pos.y = 117
+        b1_shield.hitbox.x = 3
+        b1_shield.hitbox.y = 13
+      }
+      Right => {
+        b1_shield.pos.x = 87
+        b1_shield.pos.y = 117
+        b1_shield.hitbox.x = 3
+        b1_shield.hitbox.y = 13
+      }
+      Up => {
+        b1_shield.pos.x = 72
+        b1_shield.pos.y = 115
+        b1_shield.hitbox.x = 13
+        b1_shield.hitbox.y = 3
+      }
+      Down => {
+        b1_shield.pos.x = 72
+        b1_shield.pos.y = 130
+        b1_shield.hitbox.x = 13
+        b1_shield.hitbox.y = 3
+      }
+      _ => ()
+    }
   }
 }
